@@ -1,0 +1,29 @@
+{
+  "name": "coffee-roulette",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:e2e": "bash tests/e2e/test_coffee_roulette.sh"
+  },
+  "keywords": [],
+  "author": "Jo K",
+  "license": "ISC",
+  "description": "Coffee roulette to match people",
+  "dependencies": {
+    "@babel/preset-env": "^7.24.7",
+    "babel-jest": "^29.7.0",
+    "fs": "^0.0.1-security",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.5"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  },
+  "resolutions": {
+    "cross-spawn": "7.0.5"
+  }
+}
