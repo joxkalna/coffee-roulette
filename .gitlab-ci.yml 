@@ -1,0 +1,99 @@
+image: node:latest
+
+stages:
+  - setup
+  - yarn
+  - test
+  - run
+  - display 
+  - notify
+
+variables:
+  ARTIFACT_NAME: "latest_coffee_roulette.csv"
+
+setup:
+  stage: setup
+  script:
+    - apt-get update
+    - apt-get install -y curl unzip
+    - mkdir -p artifacts
+    - bash ci_scripts/handle_artifacts.sh
+    - cp src/people.txt artifacts/
+  artifacts:
+    paths:
+      - artifacts/
+
+yarn:
+  stage: yarn
+  script:
+    - yarn install
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    expire_in: 1 week 
+    when: on_success
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  dependencies:
+    - yarn
+  script:
+    - yarn test
+
+e2e_test:
+  stage: test
+  dependencies:
+    - yarn
+  script:
+    - bash tests/e2e/test_coffee_roulette.sh
+  artifacts:
+    paths:
+      - e2e_test_artifacts/
+    when: always
+    expire_in: 1 day
+
+.manual_job_template: &manual_job_definition
+  rules:
+    - if: $RUN_COFFEE_ROULETTE
+      when: always
+    - when: never
+
+coffee_roulette_run_script:
+  <<: *manual_job_definition
+  stage: run
+  dependencies:
+    - setup
+    - yarn
+  script:
+    - bash ci_scripts/run_coffee_roulette.sh
+  artifacts:
+    reports:
+      dotenv: artifacts/latest_csv.env
+    paths:
+      - src/assigned_pairs_run_*.csv
+      - artifacts/${ARTIFACT_NAME}
+      - artifacts/people.txt
+
+display_csv:
+  <<: *manual_job_definition
+  stage: display
+  script:
+    - echo "Displaying content of ${ARTIFACT_NAME}"
+    - cat artifacts/${ARTIFACT_NAME}
+  dependencies:
+    - coffee_roulette_run_script
+  needs:  
+    - coffee_roulette_run_script
+
+send_slack_notification:
+  stage: notify
+  image: curlimages/curl:latest
+  dependencies:
+    - coffee_roulette_run_script
+  script:
+    - sh ci_scripts/send_slack_notification.sh
+  rules:
+    - if: $RUN_COFFEE_ROULETTE
