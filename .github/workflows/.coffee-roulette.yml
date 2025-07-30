@@ -67,18 +67,20 @@ jobs:
     needs: npm_install
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 'latest'
-          
+
       - name: Download node_modules
         uses: actions/download-artifact@v4
         with:
           name: node-modules
           path: node_modules/
-          
+
+      - name: Add node_modules/.bin to PATH
+        run: echo "$(pwd)/node_modules/.bin" >> $GITHUB_PATH
       - name: Run tests
         run: npm test
 
