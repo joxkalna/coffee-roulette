@@ -101,7 +101,7 @@ jobs:
         if: always()
         with:
           name: e2e-test-artifacts
-          path: e2e_test_artifacts/
+          path: tests/e2e/artifacts/
           retention-days: 1
 
   coffee_roulette_run_script:
